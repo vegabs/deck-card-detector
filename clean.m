@@ -5,18 +5,18 @@ trebol = load('trebol.mat').pjc;
 espada = load('espada.mat').pjc;
 % load('diamante.mat')
 
-figure, plot(corazon), title("Corazon");
-figure, plot(trebol), title("Trebol");
-figure, plot(espada), title("Espada");
+% figure, plot(corazon), title("Corazon");
+% figure, plot(trebol), title("Trebol");
+% figure, plot(espada), title("Espada");
 
 
 %% CAPTURA
 
 % leer la imagen
-img_name = 'img/img (1).jpg';
+img_name = 'new/img (16).jpg';
 I = imread(img_name,'jpg');
 I = rgb2gray(I);
-I = imrotate(I, 90);
+% I = imrotate(I, 90);
 % I=imresize(I, 0.5);
 [M,N,P] = size(I);
 
@@ -26,7 +26,7 @@ title("[PASO 1] Imagen en escala de grises");
 impixelinfo;
 
 % variables para deteccion
-len_card = M*N*0.10; % una carta ocupa aprox el 10% de la imagen
+len_card = M*N*0.080; % una carta ocupa aprox el 10% de la imagen
 num_cards = 0;
 
 %% IMAGEN BINARIA CON SIMBOLOS Y NUMEROS
@@ -60,9 +60,14 @@ hold off
 %% PROCESAR CADA CARTA
 for i = 1:n_objetos
     
-    card_now = find(label_objetos == i);
+    card_now_pre = find(label_objetos == i);
+    card_now_pre2 = label_objetos == i;
+    figure, imshow(card_now_pre2);
+    title("[PASO 3.5]")
+    impixelinfo;
+    
     [r,c] = find(label_objetos == i);
-    len_carta_now = length(card_now);
+    len_carta_now = length(card_now_pre);
     
     sasa = 1;
     if(len_carta_now >= len_card)
@@ -79,10 +84,11 @@ for i = 1:n_objetos
         end
         
         % extraer el pedazo de carta que contiene simbolos
-        carta_final = I1(min(r)-10:max(r)+10,min(c)-10:max(c)+10);
+        carta_final = I1(min(r):max(r),min(c):max(c));
+        % carta_final = ~carta_final*255;
         carta_final = imrotate(carta_final, angle);
-        carta_final = ~carta_final*255;
         figure, imshow(carta_final);
+        title("[PASO 4]")
         impixelinfo;
         
         numero_carta = 0;
@@ -112,8 +118,8 @@ for i = 1:n_objetos
                 figure, imshow(symbol_now);
                 impixelinfo;
                 
-                senal = sum(symbol_now,2);
-                figure, plot(senal);
+                % senal = sum(symbol_now,2);
+                % figure, plot(senal);
                                 
                 % nombre = strcat( char(randi(+'AZ')) ,'.mat');
                 % save(nombre,'pjc');
@@ -123,33 +129,37 @@ for i = 1:n_objetos
 %                 % Removes any extra elements from the longer matrix
 %                 senal = senal(1:minLength);
 %                 corazon = corazon(1:minLength);
+
                 % comparacion con los demas
+                % tipo = hallar_simbolo(senal);
                 
-                
-                be1=corrcoef(interp1(1:numel(corazon),corazon,linspace(1,numel(corazon),numel(senal))),senal);PRO1=mean(be1);compara1=(PRO1(1)+PRO1(2))/2;
-                be2=corrcoef(interp1(1:numel(trebol),trebol,linspace(1,numel(trebol),numel(senal))),senal);PRO2=mean(be2);compara2=(PRO2(1)+PRO2(2))/2;
-                be3=corrcoef(interp1(1:numel(espada),espada,linspace(1,numel(espada),numel(senal))),senal);PRO3=mean(be3);compara3=(PRO3(1)+PRO3(2))/2;
-                % be4=corrcoef(diamante,senal);PRO4=mean(be4);compara4=(PRO4(1)+PRO4(2))/2;
-                
-                if compara1>compara2 & compara1>compara3 
-                    tipo = 'corazon';
-                elseif compara2>compara1 & compara2>compara3 
-                    tipo = 'trebol';
-                elseif compara3>compara1 & compara3>compara2 
-                    tipo = 'espada';
-%                 elseif compara4>compara1 & compara4>compara2 & compara4>compara3
-%                     tipo = 'diamante';
-                end %%%end del if comparador
-                
-                disp(tipo);
+                % disp(tipo);
             end
          end
         
- 
-        
+
         disp("El número de la carta es:");
         disp(numero_carta);
         
     end
     
 end
+
+
+function tipo = hallar_simbolo(senal)
+    be1=corrcoef(interp1(1:numel(corazon),corazon,linspace(1,numel(corazon),numel(senal))),senal);PRO1=mean(be1);compara1=(PRO1(1)+PRO1(2))/2;
+    be2=corrcoef(interp1(1:numel(trebol),trebol,linspace(1,numel(trebol),numel(senal))),senal);PRO2=mean(be2);compara2=(PRO2(1)+PRO2(2))/2;
+    be3=corrcoef(interp1(1:numel(espada),espada,linspace(1,numel(espada),numel(senal))),senal);PRO3=mean(be3);compara3=(PRO3(1)+PRO3(2))/2;
+    % be4=corrcoef(diamante,senal);PRO4=mean(be4);compara4=(PRO4(1)+PRO4(2))/2;
+
+    if compara1>compara2 & compara1>compara3 
+        tipo = 'corazon';
+    elseif compara2>compara1 & compara2>compara3 
+        tipo = 'trebol';
+    elseif compara3>compara1 & compara3>compara2 
+        tipo = 'espada';
+%   elseif compara4>compara1 & compara4>compara2 & compara4>compara3
+%       tipo = 'diamante';
+    end %%%end del if comparador
+end 
+
